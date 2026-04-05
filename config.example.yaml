@@ -1,0 +1,39 @@
+# orbid configuration
+
+ground_station:
+  name: "My Station"
+  latitude: 50.0647
+  longitude: 19.9450
+  altitude: 220  # meters ASL
+
+sdr:
+  device_index: 0
+  gain: 40  # dB, or "auto"
+  sample_rate: 2400000  # 2.4 MS/s
+  ppm_correction: 0
+
+bands:
+  - name: "VHF Weather"
+    start: 136000000
+    end: 138000000
+  - name: "UHF Telemetry"
+    start: 400000000
+    end: 403000000
+  - name: "UHF Amateur"
+    start: 435000000
+    end: 438000000
+
+tle:
+  sources:
+    - celestrak
+  cache_ttl: 86400  # seconds (24h)
+
+detection:
+  fft_size: 4096
+  averaging: 16
+  snr_threshold: 10  # dB above noise floor
+
+data:
+  tle_dir: "data/tle"
+  signatures_dir: "data/signatures"
+  recordings_dir: "data/recordings"
