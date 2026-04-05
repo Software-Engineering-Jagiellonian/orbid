@@ -146,6 +146,64 @@ orbid/
 - [ ] Dokumentacja techniczna
 - [ ] Przykłady użycia (Jupyter notebooks)
 
+## Dependency graph
+
+```
+#1 TLE ──┬── #3 Filter
+         ├── #2 Predict ──── #4 Validate
+         │        │
+#13 SatNOGS DB    │    #5 SDR Interface
+    │             │    │        │
+    │             └────┼── #7 Record ── #8 Test NOAA
+    │                  │
+    #14 Sig DB    #6 Survey    #9 FFT ── #10 Noise ── #11 Detect ── #12 Test
+         │                                                │
+         │                                     #15 Features
+         │                                         │
+         └──────── #16 Matching ───────────────────┘
+                       │
+               #17 CNN (optional)
+
+#18 Temporal ──┐
+#19 Spectral ──┼── #21 Scoring ── #22 Report ── #23 Integration test
+#20 Doppler  ──┘                                       │
+                                          #24 Validate ── #25 Metrics
+                                          #26 Limitations
+                                          #27 Documentation
+```
+
+## Global execution order
+
+```
+P01  #1   Fetch TLE from CelesTrak                     depends on: -
+P02  #13  Fetch transmitter database from SatNOGS API   depends on: -
+P03  #3   Filter satellites by operator/country          depends on: #1
+P04  #2   SGP4 pass prediction for ground station        depends on: #1
+P05  #4   Validate predictor against Heavens-Above       depends on: #2
+P06  #5   RTL-SDR device interface                       depends on: #4 (soft)
+P07  #6   Wideband survey mode                           depends on: #5
+P08  #7   Targeted IQ recording during pass windows      depends on: #5, #2
+P09  #8   Test: record NOAA APT pass at 137 MHz          depends on: #7
+P10  #14  Build local signature database                 depends on: #13
+P11  #9   FFT pipeline with windowing and averaging      depends on: #8
+P12  #10  Adaptive noise floor estimation                depends on: #9
+P13  #11  Signal detection and parameter extraction      depends on: #9, #10
+P14  #12  Test: detect NOAA/Meteor in recorded IQ        depends on: #11, #8
+P15  #15  Feature extraction from spectrogram            depends on: #11
+P16  #16  Signature matching with similarity scoring     depends on: #15, #14
+P17  #17  Optional: CNN classifier on waterfall images   depends on: #15
+P18  #18  Temporal correlation                           depends on: #11, #2
+P19  #19  Spectral correlation                           depends on: #11, #13
+P20  #20  Doppler validation                             depends on: #11, #2
+P21  #21  Multi-factor confidence scoring                depends on: #18, #19, #20, #16
+P22  #22  Attribution report output                      depends on: #21
+P23  #23  Integration test: full pipeline                depends on: #22
+P24  #24  Ground truth validation                        depends on: #23
+P25  #25  Evaluation metrics                             depends on: #24
+P26  #26  Limitations analysis                           depends on: #23 (soft)
+P27  #27  Technical documentation and usage examples     depends on: #23
+```
+
 ## Hardware requirements
 
 - RTL-SDR v3 (lub kompatybilny)
